@@ -1,0 +1,7 @@
+SELECT idEnviado 
+FROM correoEnviado
+WHERE asunto regexp '^.*[1234567890]{6}.*$';
+
+SELECT idRecibido 
+FROM correoRecibido
+WHERE asunto regexp '^.*[1234567890]{6}.*$';

@@ -1,0 +1,4 @@
+Clave --> 0 - 10
+Numero --> 0 - 100 
+
+Exceptcion: num: 0 clave: 10 7

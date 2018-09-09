@@ -1,0 +1,35 @@
+DROP DATABASE IF EXISTS Reporte_correos;
+CREATE DATABASE Reporte_correos;
+USE Reporte_correos;
+CREATE TABLE correoEnviado
+(
+	idEnviado INT NOT NULL UNIQUE AUTO_INCREMENT,
+	destinatario VARCHAR(200) NOT NULL DEFAULT 'SIN DESTINATARIO',
+	asunto VARCHAR(200) NOT NULL DEFAULT 'SIN ASUNTO',
+	fecha DATE NOT NULL,
+	folio VARCHAR(6) NOT NULL,
+	PRIMARY KEY(idEnviado)
+);
+CREATE TABLE correoRecibido
+(
+	idRecibido INT NOT NULL UNIQUE AUTO_INCREMENT,
+	remitente VARCHAR(200) NOT NULL DEFAULT 'SIN REMITENTE',
+	asunto VARCHAR(200) NOT NULL DEFAULT 'SIN ASUNTO',
+	fecha date NOT NULL,
+	folio VARCHAR(6) NOT NULL,
+	PRIMARY KEY(idRecibido)
+);
+CREATE TABLE relacion
+(
+	idEnviado INT NOT NULL,
+	destinatario VARCHAR(200) NOT NULL DEFAULT 'SIN DESTINATARIO',
+	asuntoEnvio VARCHAR(200) NOT NULL DEFAULT 'SIN ASUNTO',
+	folioEnvio VARCHAR(6) NOT NULL,
+	fechaEnvio date NOT NULL,
+	idRecibido INT NOT NULL,
+	remitente VARCHAR(200) NOT NULL DEFAULT 'SIN REMITENTE',
+	asuntoRecibo VARCHAR(200) NOT NULL DEFAULT 'SIN ASUNTO',
+	folioRecibo VARCHAR(6) NOT NULL,
+	fechaRecibo date NOT NULL,
+	tiempoRespuesta int NOT NULL
+);

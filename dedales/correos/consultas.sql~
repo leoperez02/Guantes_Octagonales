@@ -1,0 +1,85 @@
+SELECT idEnviado 
+FROM correoEnviado
+WHERE asunto regexp '^.*[1234567890]{6,6}.*$';
+--892
+
+SELECT idRecibido 
+FROM correoRecibido
+WHERE asunto regexp '^.*[23]{1,1}[1234567890]{5,5}.*$';
+--1026
+
+-------------------------------------------------------------------------------
+
+SELECT idRecibido,SUBSTRING(asunto,1,6) Folio
+FROM correoRecibido AS recibidos
+WHERE asunto regexp '^[23]{1,1}[1234567890]{5,5}.*$' ;
+--712
+
+SELECT idEnviado,SUBSTRING(asunto,1,6) Folio
+FROM correoEnviado AS enviados
+WHERE asunto regexp '^[23]{1,2}[1234567890]{5,5}.*$';
+--470
+--------------------------------------------------------------------------------
+---- RELACIONAR ENVIADOS CON RECIBIDOS CUANDO HAY FOLIO EN AMBOS AL INICIO -----
+SELECT enviados.idEnviado,enviados.destinatario,enviados.asunto,enviados.fecha,recibidos.idRecibido,recibidos.remitente,recibidos.asunto,recibidos.fecha,DATEDIFF(enviados.fecha,recibidos.fecha) Dias
+FROM(
+	SELECT idEnviado,destinatario,fecha,asunto,SUBSTRING(asunto,1,6) Folio
+	FROM correoEnviado
+	WHERE asunto regexp '^[23]{1,2}[1234567890]{5,5}.*$'
+) AS enviados
+JOIN( 
+	SELECT idRecibido,remitente,fecha,asunto,SUBSTRING(asunto,1,6) Folio
+	FROM correoRecibido
+	WHERE asunto regexp '^[23]{1,1}[1234567890]{5,5}.*$'
+) AS recibidos
+ON enviados.Folio=recibidos.Folio
+
+INTO OUTFILE '/tmp/relacionados.csv'
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n';
+
+--------------------------------------------------------------------------------
+----- Enviados sin relacionar -----
+SELECT idEnviado,destinatario,asunto,fecha 
+FROM correoEnviado 
+WHERE idEnviado NOT IN(
+	SELECT enviados.idEnviado
+	FROM(
+		SELECT idEnviado,destinatario,fecha,asunto,SUBSTRING(asunto,1,6) Folio
+		FROM correoEnviado
+		WHERE asunto regexp '^[23]{1,2}[1234567890]{5,5}.*$'
+	) AS enviados
+	JOIN( 
+		SELECT idRecibido,remitente,fecha,asunto,SUBSTRING(asunto,1,6) Folio
+		FROM correoRecibido
+		WHERE asunto regexp '^[23]{1,1}[1234567890]{5,5}.*$'
+	) AS recibidos
+	ON enviados.Folio=recibidos.Folio
+)
+INTO OUTFILE '/tmp/enviados_faltantes.csv'
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n';
+
+
+----- Recibidos sin relacionar -----
+SELECT idRecibido,remitente,asunto,fecha 
+FROM correoRecibido 
+WHERE idRecibido NOT IN(
+	SELECT recibidos.idRecibido
+	FROM(
+		SELECT idEnviado,destinatario,fecha,asunto,SUBSTRING(asunto,1,6) Folio
+		FROM correoEnviado
+		WHERE asunto regexp '^[23]{1,2}[1234567890]{5,5}.*$'
+	) AS enviados
+	JOIN( 
+		SELECT idRecibido,remitente,fecha,asunto,SUBSTRING(asunto,1,6) Folio
+		FROM correoRecibido
+		WHERE asunto regexp '^[23]{1,1}[1234567890]{5,5}.*$'
+	) AS recibidos
+	ON enviados.Folio=recibidos.Folio
+)
+INTO OUTFILE '/tmp/recibidos_faltantes.csv'
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n';
+
+
